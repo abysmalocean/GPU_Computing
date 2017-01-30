@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <iostream>
 
 // includes, project
 //include <cutil.h>
@@ -72,7 +73,20 @@ int main(int argc, char** argv) {
 			return 1;
 		}
 	}
-
+	//print M
+	printf("Element in the M is:\n");
+ for(int i = 0 ; i < size_elements ; i++)
+ {
+	 std::cout<<M.elements[i]<< " ";
+ }
+ printf("\nend\n");
+ //print N
+ printf("Element in the N is:\n");
+for(int i = 0 ; i < size_elements ; i++)
+{
+	std::cout<<N.elements[i]<< " ";
+}
+printf("\nend\n");
 	// M * N on the device
     MatrixMulOnDevice(M, N, P);
 
@@ -84,19 +98,19 @@ int main(int argc, char** argv) {
 		printf("Element in the matrix is:\n");
 	 for(int i = 0 ; i < size_elements ; i++)
 	 {
-		 printf(" %ld",reference.elements[i]);
+		 std::cout<<reference.elements[i]<< " ";
 	 }
 	 printf("\nend\n");
 
 	 printf("Element in the GPU is:\n");
 		for(int i = 0 ; i < size_elements ; i++)
 		{
-			printf(" %ld",P.elements[i]);
+			std::cout<<P.elements[i]<< " ";
 		}
 	printf("\nend\n");
    for (int i=0;i<size_elements;i++)
 	 {
-		 printf("P.elements is [%ld] and reference is [%ld]",P.elements[i],reference.elements[i]);
+		 printf("P.elements is [%f] and reference is [%f]",P.elements[i],reference.elements[i]);
 		 if (fabs(reference.elements[i]-P.elements[i])>0.0001f) {
 			 res=false;
 			 break;
