@@ -67,8 +67,6 @@ void computeGold( float* reference, float* idata, const unsigned int len);
 __global__ void reduction(float *g_data,float *result, int n)
 {
   printf("Liang Xu in kernel\n");
-  result = g_data;
-/*
   __shared__ float sharedMemory[256];
 
   int tid = blockIdx.x*blockDim.x + threadIdx.x;
@@ -85,7 +83,6 @@ __global__ void reduction(float *g_data,float *result, int n)
    {
     atomicAdd(result, sharedMemory[0]);
    }
-  */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,6 +180,7 @@ float computeOnDevice(float* h_data, int num_elements)
 
   int threadsPerBlock = 128;
   int blocksPerGrid = (NUM_ELEMENTS + threadsPerBlock - 1) / threadsPerBlock;
+
   printf("blockperGrid is %d \n",blocksPerGrid);
   printf("Start the CUDA kernel\n" );
   cudaError_t cudaError = cudaGetLastError();
