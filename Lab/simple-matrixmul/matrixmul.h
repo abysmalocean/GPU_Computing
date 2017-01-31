@@ -37,7 +37,7 @@
 #define _MATRIXMUL_H_
 
 // Thread block size
-#define MATRIX_SIZE 4
+#define MATRIX_SIZE 100
 
 // Matrix dimensions
 // (chosen as multiples of the thread block size for simplicity)

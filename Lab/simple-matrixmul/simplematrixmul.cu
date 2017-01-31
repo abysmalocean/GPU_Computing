@@ -73,6 +73,7 @@ int main(int argc, char** argv) {
 			return 1;
 		}
 	}
+	/*
 	//print M
 	printf("Element in the M is:\n");
  for(int i = 0 ; i < size_elements ; i++)
@@ -87,6 +88,7 @@ for(int i = 0 ; i < size_elements ; i++)
 	std::cout<<N.elements[i]<< " ";
 }
 printf("\nend\n");
+*/
 	// M * N on the device
     MatrixMulOnDevice(M, N, P);
 
@@ -95,6 +97,7 @@ printf("\nend\n");
     computeGold(reference.elements, M.elements, N.elements, HM, WM, WN);
 
     bool res=true;
+		/*
 		printf("Element in the matrix is:\n");
 	 for(int i = 0 ; i < size_elements ; i++)
 	 {
@@ -108,9 +111,10 @@ printf("\nend\n");
 			std::cout<<P.elements[i]<< " ";
 		}
 	printf("\nend\n");
+	*/
    for (int i=0;i<size_elements;i++)
 	 {
-		 printf("P.elements is [%f] and reference is [%f]",P.elements[i],reference.elements[i]);
+		 //printf("P.elements is [%f] and reference is [%f]",P.elements[i],reference.elements[i]);
 		 if (fabs(reference.elements[i]-P.elements[i])>0.0001f) {
 			 res=false;
 			 break;
@@ -154,12 +158,12 @@ void MatrixMulOnDevice(const Matrix M, const Matrix N, Matrix P)
 	Matrix Pdevice = AllocateDeviceMatrix(P);
 	CopyToDeviceMatrix(Mdevice, M);
 	CopyToDeviceMatrix(Ndevice, N);
-	int threadsPerBlockDim = 16;
+	int threadsPerBlockDim = 8;
 	int gridDimSize = (MATRIX_SIZE + threadsPerBlockDim - 1) / threadsPerBlockDim;
 	dim3 blockSize(threadsPerBlockDim, threadsPerBlockDim);
 	dim3 gridSize (gridDimSize, gridDimSize);
 	printf("Start runing the CUDA Kernel\n");
-	MatrixMulKernel<<<gridSize,blockSize>>>(Mdevice, Mdevice, Pdevice);
+	MatrixMulKernel<<<gridSize,blockSize>>>(Mdevice, Ndevice, Pdevice);
 	CopyFromDeviceMatrix(P, Pdevice);
 
 	cudaError_t cudaError = cudaGetLastError();

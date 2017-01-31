@@ -8,35 +8,37 @@ Simple Matrix Multiplication
     source code elsewhere.  The size of the matrix is defined such that one
     thread block will be sufficient to compute the entire solution matrix.
 
-3)  There are several modes of operation for the application.  
+3)  There are several modes of operation for the application.
 
-    No arguments:  The application will create two randomly initialized matrices to 
-    multiply.  After the device multiplication is invoked, it will compute 
-    the correct solution matrix using the CPU, and compare that solution with 
-    the device-computed solution.  If it matches (within a certain tolerance), 
-    if will print out "Test PASSED" to the screen before exiting.  
+    No arguments:  The application will create two randomly initialized matrices to
+    multiply.  After the device multiplication is invoked, it will compute
+    the correct solution matrix using the CPU, and compare that solution with
+    the device-computed solution.  If it matches (within a certain tolerance),
+    if will print out "Test PASSED" to the screen before exiting.
 
-    One argument:  The application will use the random initialization to 
-    create the input matrices, and write the device-computed output to the file 
-    specified by the argument.  
+    One argument:  The application will use the random initialization to
+    create the input matrices, and write the device-computed output to the file
+    specified by the argument.
 
-    Two arguments:  The application will initialize the two input matrices with 
+    Two arguments:  The application will initialize the two input matrices with
     the values found in the files provided as arguments.  No output is written to file.
 
-    Three arguments:  The application will read its inputs from the files provided 
-    by the first two arguments, and write its output to the file provided in the third.  
+    Three arguments:  The application will read its inputs from the files provided
+    by the first two arguments, and write its output to the file provided in the third.
 
-    Note that if you wish to use the output of one run of the application as an input, 
-    you must delete the first line in the output file, which displays the accuracy of the 
-    values within the file.  The value is not relevant for this application.  
+    Note that if you wish to use the output of one run of the application as an input,
+    you must delete the first line in the output file, which displays the accuracy of the
+    values within the file.  The value is not relevant for this application.
 
 
 4)  Answer the following questions:
 
     1.  How many times is each element of the input matrices loaded during the execution of the kernel?
+        The matrix size is MATRIX_SIZE. So each of the element of the input matrix will load MATRIX_SIZE times.
 
-    2.  What is the memory-access to floating-point computation ratio in each thread?  
-        Consider a multiply and addition as separate operations, and ignore the storing 
-        of the result.  Only global memory loads should be counted towards 
-	your off-chip bandwidth
-
+    2.  What is the memory-access to floating-point computation ratio in each thread?
+        Consider a multiply and addition as separate operations, and ignore the storing
+        of the result.  Only global memory loads should be counted towards
+	      your off-chip bandwidth
+        The matrix size is MATRIX_SIZE. Each of 2 memory access will create 1 float multiple ,and 1
+        float addition. So memory-access to floating-point ratio is 1

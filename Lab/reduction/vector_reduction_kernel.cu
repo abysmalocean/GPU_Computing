@@ -33,41 +33,17 @@
  * source code with only those rights set forth herein.
  */
 
-/* Matrix multiplication: P = M * N.
- * Device code.
- */
+#ifndef _SCAN_NAIVE_KERNEL_H_
+#define _SCAN_NAIVE_KERNEL_H_
 
-#ifndef _MATRIXMUL_KERNEL_H_
-#define _MATRIXMUL_KERNEL_H_
+#define NUM_ELEMENTS 512
 
-#include <stdio.h>
-#include "matrixmul.h"
 
-////////////////////////////////////////////////////////////////////////////////
-//! Simple test kernel for device functionality
+// **===----------------- MP3 - Modify this function ---------------------===**
 //! @param g_idata  input data in global memory
-//! @param g_odata  output data in global memory
-////////////////////////////////////////////////////////////////////////////////
-// Matrix multiplication kernel thread specification
-__global__ void MatrixMulKernel(Matrix M, Matrix N, Matrix P)
-{
-	//Multiply the two matrices
-  int column = ( blockDim.x * blockIdx.x ) + threadIdx.x;
-	int row    = ( blockDim.y * blockIdx.y ) + threadIdx.y;
-  if (row < MATRIX_SIZE && column < MATRIX_SIZE)
-  {
-    float sum = 0;
-    for(int k = 0; k < MATRIX_SIZE; k++)
-    {
-      //sum + = M.elements[row * MATRIX_SIZE + k] * N.elements[k * MATRIX_SIZE + column];
-      //printf("index M is [%d] and index N is [%d]\n",row * MATRIX_SIZE + k,k*MATRIX_SIZE + column);
-      sum = sum + M.elements[row * MATRIX_SIZE + k] * N.elements[k*MATRIX_SIZE + column];
-      //printf("index M is [%d] --->[%lf] and index N is [%d]---> [%lf], sum is [%lf]\n",row * MATRIX_SIZE + k,M.elements[column * MATRIX_SIZE + k],k*MATRIX_SIZE + column,N.elements[k*MATRIX_SIZE + row],sum);
-      //printf("sum is %lf\n",sum);
-    }
-    //printf("sum Equalt to %f and save to P[%d], row is [%d], and clumn is [%d]\n",sum,row * MATRIX_SIZE + column,row,column);
-    P.elements[row * MATRIX_SIZE + column] = sum ;
-  }
-}
+//                  result is expected in index 0 of g_idata
+//! @param n        input number of elements to scan from input data
+// **===------------------------------------------------------------------===**
 
-#endif // #ifndef _MATRIXMUL_KERNEL_H_
+
+#endif // #ifndef _SCAN_NAIVE_KERNEL_H_
