@@ -158,7 +158,7 @@ float computeOnDevice(float* h_data, int num_elements)
   cudaMemcpy(d_array,h_data,NUM_ELEMENTS * sizeof(float),cudaMemcpyHostToDevice);
   cudaMemset(d_result, (float)0, sizeof(float));
 
-  int threadsPerBlock = 128;
+  int threadsPerBlock = 512;
   int blocksPerGrid = (NUM_ELEMENTS + threadsPerBlock - 1) / threadsPerBlock;
 
   printf("blockperGrid is %d \n",blocksPerGrid);
@@ -193,6 +193,6 @@ float computeOnDevice(float* h_data, int num_elements)
     //printf("Liang Xu\n");
     //std::cout <<"result is " << *h_result << std::endl;
   // placeholder
-  return result[0];
+  return h_result[0];
 
 }
