@@ -64,27 +64,6 @@ float computeOnDevice(float* h_data, int array_mem_size);
 extern "C"
 void computeGold( float* reference, float* idata, const unsigned int len);
 
-__global__ void reduction(float *g_data,float *result, int n)
-{
-  printf("Liang Xu in kernel\n");
-  __shared__ float sharedMemory[256];
-
-  int tid = blockIdx.x*blockDim.x + threadIdx.x;
-  sharedMemory[threadIdx.x] = (tid < n) ? g_data[tid] : 0;
-  printf("Liang Xu in Kernel\n");
-   __syncthreads();
-   for (int s = blockDim.x/2; s > 0; s >>= 1)
-   {
-     if (threadIdx.x < s)
-     sharedMemory[threadIdx.x] += sharedMemory[threadIdx.x + s];
-     __syncthreads();
-   }
-   if (threadIdx.x == 0)
-   {
-    atomicAdd(result, sharedMemory[0]);
-   }
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // Program main
 ////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +168,8 @@ float computeOnDevice(float* h_data, int num_elements)
     fprintf(stderr, "cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
     exit(EXIT_FAILURE);
   }
-  reduction<<<blocksPerGrid, threadsPerBlock>>>(d_array,d_result, NUM_ELEMENTS);
+  int numElements = NUM_ELEMENTS;
+  reduction<<<blocksPerGrid, threadsPerBlock>>>(d_array,d_result, numElements);
 
   cudaError = cudaGetLastError();
   printf("Liang Xu\n");

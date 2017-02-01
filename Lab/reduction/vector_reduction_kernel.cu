@@ -45,5 +45,26 @@
 //! @param n        input number of elements to scan from input data
 // **===------------------------------------------------------------------===**
 
+__global__ void reduction(float *g_data,float *result, int n)
+{
+  printf("Liang Xu in kernel\n");
+  __shared__ float sharedMemory[256];
+
+  int tid = blockIdx.x*blockDim.x + threadIdx.x;
+  sharedMemory[threadIdx.x] = (tid < n) ? g_data[tid] : 0;
+  printf("Liang Xu in Kernel\n");
+   __syncthreads();
+   for (int s = blockDim.x/2; s > 0; s >>= 1)
+   {
+     if (threadIdx.x < s)
+     sharedMemory[threadIdx.x] += sharedMemory[threadIdx.x + s];
+     __syncthreads();
+   }
+   if (threadIdx.x == 0)
+   {
+    atomicAdd(result, sharedMemory[0]);
+   }
+}
+
 
 #endif // #ifndef _SCAN_NAIVE_KERNEL_H_
