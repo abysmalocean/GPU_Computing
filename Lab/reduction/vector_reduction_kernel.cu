@@ -47,12 +47,12 @@
 
 __global__ void reduction(float *g_data,float *result, int n)
 {
-  printf("Liang Xu in kernel\n");
+  //printf("Liang Xu in kernel\n");
   __shared__ float sharedMemory[256];
 
   int tid = blockIdx.x*blockDim.x + threadIdx.x;
   sharedMemory[threadIdx.x] = (tid < n) ? g_data[tid] : 0;
-  printf("Liang Xu in Kernel\n");
+  //printf("Liang Xu in Kernel\n");
    __syncthreads();
    for (int s = blockDim.x/2; s > 0; s >>= 1)
    {

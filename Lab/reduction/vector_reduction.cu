@@ -182,7 +182,7 @@ float computeOnDevice(float* h_data, int num_elements)
   // Copy the result
     cudaMemcpy(h_result, d_result, sizeof(float), cudaMemcpyDeviceToHost);
     cudaError = cudaGetLastError();
-    printf("Liang Xu\n");
+    //printf("Liang Xu\n");
     if(cudaError != cudaSuccess)
     {
       fprintf(stderr, "cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
@@ -190,9 +190,9 @@ float computeOnDevice(float* h_data, int num_elements)
     }
 
     //std::cout <<"result is " << *h_result << std::endl;
-    printf("Liang Xu\n");
+    //printf("Liang Xu\n");
     //std::cout <<"result is " << *h_result << std::endl;
   // placeholder
-  return h_data[0];
+  return result[0];
 
 }
