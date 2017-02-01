@@ -149,13 +149,14 @@ int ReadFile(float* M, char* file_name)
 // Note: float* h_data is both the input and the output of this function.
 float computeOnDevice(float* h_data, int num_elements)
 {
-  float *d_array, *d_result, *h_result;
+  float *d_array, *d_result;
+  float *h_result = (float *)malloc(sizeof(float));
   //Alocate the device input verctors
   cudaMalloc(&d_array, NUM_ELEMENTS * sizeof(float));
   cudaMalloc(&d_result, sizeof(float));
   // Copy the host input vectors
   cudaMemcpy(d_array,h_data,NUM_ELEMENTS * sizeof(float),cudaMemcpyHostToDevice);
-  cudaMemset(d_result, 0.000, sizeof(float));
+  cudaMemset(d_result, (float)0, sizeof(float));
 
   int threadsPerBlock = 128;
   int blocksPerGrid = (NUM_ELEMENTS + threadsPerBlock - 1) / threadsPerBlock;
