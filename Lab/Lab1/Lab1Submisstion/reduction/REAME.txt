@@ -31,3 +31,9 @@ Data Parallel Reduction
     2. Over the life of the program, how many warps will be adversely affected
        by SIMD divergence?  Remember that SIMD divergence happens when threads
        within a warp take different code paths through the program.
+       Branch divergence occurs when threades inside warps branches to different execution paths.
+       All threads run the same kernel. 
+       Warp = Threads grouped into a SIMD instruction.
+       A warp has 32 threads, and 512/32 = 16 warps. All the warp will be affected by the 
+       SIMD divergence. Because only the first thread left after the reduction. 
+       
