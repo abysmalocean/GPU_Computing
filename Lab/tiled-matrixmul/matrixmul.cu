@@ -79,8 +79,8 @@ int main(int argc, char** argv) {
 	unsigned int size_elements;
 
 	srand(52);
-	
-	if(argc != 5 && argc != 4) 
+
+	if(argc != 5 && argc != 4)
 	{
 		// Allocate and initialize the matrices
 		M  = AllocateMatrix(rand() % 1024, rand() % 1024, 1);
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 		// Allocate and read in matrices from disk
 		int* params = NULL; //(int*)malloc(3 * sizeof(int));
 	    	unsigned int data_read = 0;
-	    
+
 		//cutReadFilei(argv[1], &params, &data_read, true);
 		FILE *fp=fopen(argv[1],"rb");
 		if (fp==NULL) return -1;
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
 		}
 
 		M  = AllocateMatrix(params[0], params[1], 0);
-		N  = AllocateMatrix(params[1], params[2], 0);		
+		N  = AllocateMatrix(params[1], params[2], 0);
 		P  = AllocateMatrix(params[0], params[2], 0);
 		errorM = ReadFile(&M, argv[2]);
 		errorN = ReadFile(&N, argv[3]);
@@ -120,15 +120,15 @@ int main(int argc, char** argv) {
 
 	// M * N on the device
 	MatrixMulOnDevice(M, N, P);
-    
+
 	printf("GPU computation complete\n");
 	// compute the matrix multiplication on the CPU for comparison
 	Matrix reference = AllocateMatrix(P.height, P.width, 0);
 	computeGold(reference.elements, M.elements, N.elements, M.height, M.width, N.width);
-        
+
 	printf("CPU computation complete\n");
     // in this case check if the result is equivalent to the expected soluion
-    //CUTBoolean res = cutComparefe(reference.elements, P.elements, 
+    //CUTBoolean res = cutComparefe(reference.elements, P.elements,
 	//								P.height*P.width,  0.001f);
 
     	bool res=true;
@@ -137,13 +137,13 @@ int main(int argc, char** argv) {
 
    	for (int i=0;i<size_elements;i++)
 	if (fabs(reference.elements[i]-P.elements[i])>0.0001f) {
-		res=false;    
+		res=false;
 		break;
 	}
 
-    
+
     	printf("Test %s\n", (true == res) ? "PASSED" : "FAILED");
-    
+
     if(argc == 5)
     {
 		WriteFile(P, argv[4]);
@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
 	else if(argc == 2)
 	{
 	    WriteFile(P, argv[1]);
-	}   
+	}
 
 	// Free matrices
     FreeMatrix(&M);
@@ -175,13 +175,27 @@ void MatrixMulOnDevice(const Matrix M, const Matrix N, Matrix P)
     // Allocate P on the device
     Matrix Pd = AllocateDeviceMatrix(P);
     CopyToDeviceMatrix(Pd, P); // Clear memory
+		//Setup the execution configuration
+		int blky = (P.height%TILED_WIDTH==0)?P.height/TILED_WIDTH:P.height/TILED_WIDTH+1;
+		int blkx = (P.width%TILED_WIDTH==0)?P.width/TILED_WIDTH:P.width/TILED_WIDTH+1;
+		dim3 block2D(blkx, blky);
+		dim3 thread2D(TILED_WIDTH, TILED_WIDTH);
 
-	// Setup the execution configuration
- 
-    // Launch the device computation threads!
-
+		cudaEvent_t start, stop;
+		float elapsedTime=0.0f;
+		cudaEventCreate(&start);
+		cudaEventCreate(&stop);
+		cudaEventRecord(start, 0);
+		//Launch the device computation threads!
+		MatrixMulKernel<<<block2D,thread2D>>>(Md, Nd, Pd);
+		cudaEventRecord(stop,0);
+		cudaEventSynchronize(stop);
+		cudaEventElapsedTime(&elapsedTime, start, stop);
+		cudaEventDestroy(start);
+		cudaEventDestroy(stop);
+		printf("The execution time of GPU is:%f\n",elapsedTime);
     // Read P from the device
-    CopyFromDeviceMatrix(P, Pd); 
+    CopyFromDeviceMatrix(P, Pd);
 
     // Free device matrices
     FreeDeviceMatrix(&Md);
@@ -199,9 +213,9 @@ Matrix AllocateDeviceMatrix(const Matrix M)
 }
 
 // Allocate a device matrix of dimensions height*width
-//	If init == 0, initialize to all zeroes.  
+//	If init == 0, initialize to all zeroes.
 //	If init == 1, perform random initialization.
-//  If init == 2, initialize matrix parameters, but do not allocate memory 
+//  If init == 2, initialize matrix parameters, but do not allocate memory
 Matrix AllocateMatrix(int height, int width, int init)
 {
     Matrix M;
@@ -209,11 +223,11 @@ Matrix AllocateMatrix(int height, int width, int init)
     M.height = height;
     int size = M.width * M.height;
     M.elements = NULL;
-    
+
     // don't allocate memory on option 2
     if(init == 2)
 		return M;
-		
+
 	M.elements = (float*) malloc(size*sizeof(float));
 
 	for(unsigned int i = 0; i < M.height * M.width; i++)
@@ -221,7 +235,7 @@ Matrix AllocateMatrix(int height, int width, int init)
 		M.elements[i] = (init == 0) ? (0.0f) : (rand()*3 / (float)RAND_MAX);
 	}
     return M;
-}	
+}
 
 // Copy a host matrix to a device matrix.
 void CopyToDeviceMatrix(Matrix Mdevice, const Matrix Mhost)
@@ -230,7 +244,7 @@ void CopyToDeviceMatrix(Matrix Mdevice, const Matrix Mhost)
     Mdevice.height = Mhost.height;
     Mdevice.width = Mhost.width;
     Mdevice.pitch = Mhost.pitch;
-    cudaMemcpy(Mdevice.elements, Mhost.elements, size, 
+    cudaMemcpy(Mdevice.elements, Mhost.elements, size,
 					cudaMemcpyHostToDevice);
 }
 
@@ -238,7 +252,7 @@ void CopyToDeviceMatrix(Matrix Mdevice, const Matrix Mhost)
 void CopyFromDeviceMatrix(Matrix Mhost, const Matrix Mdevice)
 {
     int size = Mdevice.width * Mdevice.height * sizeof(float);
-    cudaMemcpy(Mhost.elements, Mdevice.elements, size, 
+    cudaMemcpy(Mhost.elements, Mdevice.elements, size,
 					cudaMemcpyDeviceToHost);
 }
 
@@ -281,5 +295,3 @@ void WriteFile(Matrix M, char* file_name)
 	fwrite(M.elements,sizeof(float),M.width*M.height,fp);
 	fclose(fp);
 }
-
-

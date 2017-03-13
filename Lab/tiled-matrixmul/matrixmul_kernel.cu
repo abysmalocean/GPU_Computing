@@ -51,8 +51,6 @@
 // Matrix multiplication kernel thread specification
 __global__ void MatrixMulKernel(Matrix M, Matrix N, Matrix P)
 {
-        __shared__ float Mds[TILED_WIDTH][TILED_WIDTH];
-        __shared__ float Nds[TILED_WIDTH][TILED_WIDTH];
         int bx=blockIdx.x;
         int by=blockIdx.y;
         int tx=threadIdx.x;
@@ -60,25 +58,13 @@ __global__ void MatrixMulKernel(Matrix M, Matrix N, Matrix P)
         int row = by * TILED_WIDTH + ty;
         int col = bx * TILED_WIDTH + tx;
         float p_sum=0.0f;
-        for(int m=0; m<(M.width-1)/TILED_WIDTH+1; m++)
+        if(row<P.height&&col<P.width)
         {
-                if((m*TILED_WIDTH+tx)<M.width&&row<M.height)
-                        Mds[ty][tx] = M.elements[row*M.width+(m*TILED_WIDTH+tx)];
-                else
-                        Mds[ty][tx] = 0.0;
-                if((m*TILED_WIDTH+ty)<N.height&&col<N.width)
-                        Nds[ty][tx] = N.elements[(m*TILED_WIDTH+ty)*N.width+col];
-                else
-                        Nds[ty][tx] = 0.0;
-                __syncthreads();
-                for(int n=0; n<TILED_WIDTH; n++)
-                {
-                        p_sum += Mds[ty][n]*Nds[n][tx];
-                }
-                __syncthreads();
+                for(int i=0; i<M.width; i++ )
+                        p_sum += M.elements[row*M.width+i]*N.elements[i*N.width+col];
         }
         if(row<P.height&&col<P.width)
-                P.elements[ row*P.width+col] = p_sum;
+                P.elements[row*P.width+col] = p_sum;
 
 }
 
