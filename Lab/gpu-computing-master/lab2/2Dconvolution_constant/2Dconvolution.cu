@@ -44,7 +44,7 @@
 #include <math.h>
 
 // includes, project
-#include <cutil.h>
+//#include <cutil.h>
 
 // includes, kernels
 #include <2Dconvolution_kernel.cu>
