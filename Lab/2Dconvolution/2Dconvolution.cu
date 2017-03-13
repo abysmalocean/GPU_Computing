@@ -90,24 +90,39 @@ int main(int argc, char** argv) {
         {
                 // Allocate and read in matrices from disk
                 int* params = NULL;
-                unsigned int data_read = 0;
+                int data_read = 0;
                 //cutReadFilei(argv[1], &params, &data_read, true);
                 FILE *fp=fopen(argv[1],"rb");
-                if (fp==NULL) return -1;
+                if (fp==NULL)
+                {
+                        printf("Nothing in the file\n");
+                        return -1;
+                }
+                int Num_read = 0;
                 while (!feof(fp)) {
-                        fread(&(params[data_read++]),sizeof(int),1,fp);
+                        //printf("Nothing in the file\n");
+                        //fread(&(params[data_read++]),sizeof(int),1,fp);
+                        //printf("%f\n",params[data_read] );
+                        fscanf (fp, "%d", &data_read);
+                        Num_read += 1;
+                        if(Num_read == 2)
+                        {break;}
                 }
                 fclose(fp);
+                /*
+                printf("Liang Xu\n");
+                params[0] = (int)data_read;
+                params[1] = (int)data_read;
 
                 if(data_read != 2) {
                         printf("Error reading parameter file\n");
                         return 1;
                 }
-
+                */
                 A  = AllocateMatrix(KERNEL_SIZE, KERNEL_SIZE, 0);
-                B  = AllocateMatrix(params[0], params[1], 0);
-                C  = AllocateMatrix(params[0], params[1], 0);
                 (void)ReadFile(&A, argv[2]);
+                B  = AllocateMatrix(data_read, data_read, 0);
+                C  = AllocateMatrix(data_read, data_read, 0);
                 (void)ReadFile(&B, argv[3]);
         }
 
@@ -270,14 +285,24 @@ int ReadFile(Matrix* M, char* file_name)
         unsigned int i=0;
         //cutReadFilef(file_name, &(M->elements), &data_read, true);
         FILE *fp=fopen(file_name,"rb");
+        float temp;
         if (fp==NULL) return -1;
+        int limit = M->width * M->height;
         while (!feof(fp)) {
-                fread(&(M->elements[i]),sizeof(float),1,fp);
+                fscanf (fp, "%f", &temp);
+                M->elements[i] = temp;
+                if(i = limit )
+                {
+                  break;
+                }
+                //fread(&(M->elements[i]),sizeof(float),1,fp);
+                //printf("Element is %f\n",M->elements[i] );
                 i++;
         }
         fclose(fp);
         return i;
 }
+
 
 void WriteFile(Matrix M, char* file_name)
 {
