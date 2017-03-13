@@ -83,8 +83,8 @@ int main(int argc, char** argv) {
 								if(argc != 5 && argc != 4)
 								{
 																// Allocate and initialize the matrices
-																M  = AllocateMatrix(rand() % 1024, rand() % 1024, 1);
-																N  = AllocateMatrix(M.width, rand() % 1024, 1);
+																M  = AllocateMatrix(rand() % DATASIZE, rand() % DATASIZE, 1);
+																N  = AllocateMatrix(M.width, rand() % DATASIZE, 1);
 																P  = AllocateMatrix(M.height, N.width, 0);
 								}
 								else
@@ -122,6 +122,7 @@ int main(int argc, char** argv) {
 								MatrixMulOnDevice(M, N, P);
 
 								printf("GPU computation complete\n");
+								printf("Data size is %d\n",DATASIZE);
 								// compute the matrix multiplication on the CPU for comparison
 								Matrix reference = AllocateMatrix(P.height, P.width, 0);
 								computeGold(reference.elements, M.elements, N.elements, M.height, M.width, N.width);
@@ -136,7 +137,11 @@ int main(int argc, char** argv) {
 								size_elements = P.height*P.width;
 
 								for (int i=0; i<size_elements; i++)
-																if (fabs(reference.elements[i]-P.elements[i])>0.0001f) {
+																if (fabs(reference.elements[i]-P.elements[i])>0.01f) {
+																								printf("Found Different\n");
+																								printf("Point [%d] is different\n",i );
+																								printf("reference value is [%f]\n",reference.elements[i]);
+																								printf("GPU value is [%f]\n\n",P.elements[i]);
 																								res=false;
 																								break;
 																}
@@ -171,14 +176,12 @@ void MatrixMulOnDevice(const Matrix M, const Matrix N, Matrix P)
 								CopyToDeviceMatrix(Md, M);
 								Matrix Nd = AllocateDeviceMatrix(N);
 								CopyToDeviceMatrix(Nd, N);
-
 								// Allocate P on the device
 								Matrix Pd = AllocateDeviceMatrix(P);
 								CopyToDeviceMatrix(Pd, P); // Clear memory
-
 								// Setup the execution configuration
-								int blky = P.height/TILED_WIDTH;
-								int blkx = P.width/TILED_WIDTH;
+								int blky = (M.height%TILED_WIDTH==0) ? M.height/TILED_WIDTH : M.height/TILED_WIDTH+1;
+								int blkx = (N.width%TILED_WIDTH==0) ? N.width/TILED_WIDTH : N.width/TILED_WIDTH+1;
 								dim3 block2D(blkx, blky);
 								dim3 thread2D(TILED_WIDTH, TILED_WIDTH);
 
@@ -192,10 +195,11 @@ void MatrixMulOnDevice(const Matrix M, const Matrix N, Matrix P)
 								cudaEventRecord(stop,0);
 								cudaEventSynchronize(stop);
 								cudaEventElapsedTime(&elapsedTime, start, stop);
+								printf("The execution time of GPU is:%f\n",elapsedTime);
+								printf("The tiled size is:%d\n",TILED_WIDTH);
 								// Read P from the device
 								CopyFromDeviceMatrix(P, Pd);
-
-								// Free device matrices
+								//Free device matrices
 								FreeDeviceMatrix(&Md);
 								FreeDeviceMatrix(&Nd);
 								FreeDeviceMatrix(&Pd);
