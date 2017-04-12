@@ -71,9 +71,6 @@ __global__ void MatrixMulKernelA2(Matrix M, Matrix N, Matrix P)
 
 }
 
-
-
-
 __global__ void MatrixMulKernelB(Matrix M, Matrix N, Matrix P)
 {
         //Multiply the two matrices
